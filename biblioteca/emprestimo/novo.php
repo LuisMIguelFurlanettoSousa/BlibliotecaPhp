@@ -1,19 +1,8 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <title>Novo Empréstimo</title>
-</head>
-<body>
-
 <?php
 include '../includes/validar_sessao.php';
-include '../componentes/menu.php';
+include '../includes/validacoes.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
     include '../includes/database.php';
 
     $id_aluno = $_POST["id_aluno"];
@@ -22,9 +11,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $livros = isset($_POST["livros"]) ? $_POST["livros"] : [];
     $id_usuario = $_SESSION['user_id'];
 
+    // Validações
+    $erros = [];
+
     if (empty($livros)) {
-        $_SESSION['mensagem_erro'] = "Selecione pelo menos um livro para o empréstimo.";
-        header("location: /biblioteca/emprestimo/novo.php");
+        $erros[] = "Selecione pelo menos um livro para o empréstimo.";
+    }
+
+    // Validar datas
+    if (!validar_data($data_emprestimo)) {
+        $erros[] = "Data de empréstimo inválida.";
+    }
+
+    if (!validar_data($data_devolucao_prevista)) {
+        $erros[] = "Data de devolução prevista inválida.";
+    }
+
+    // Validar que data devolução é posterior à data empréstimo
+    if (validar_data($data_emprestimo) && validar_data($data_devolucao_prevista)) {
+        if (!data_anterior($data_emprestimo, $data_devolucao_prevista)) {
+            $erros[] = "A data de devolução prevista deve ser posterior à data de empréstimo.";
+        }
+    }
+
+    // Verificar se aluno existe
+    $check_aluno = $conn->prepare("SELECT id FROM aluno WHERE id = ?");
+    $check_aluno->bind_param("i", $id_aluno);
+    $check_aluno->execute();
+    if ($check_aluno->get_result()->num_rows == 0) {
+        $erros[] = "Aluno selecionado não existe!";
+    }
+    $check_aluno->close();
+
+    // Verificar disponibilidade dos livros
+    foreach ($livros as $id_livro) {
+        $check_disponivel = $conn->prepare("SELECT el.id FROM emprestimo_livro el WHERE el.id_livro = ? AND el.data_devolucao IS NULL");
+        $check_disponivel->bind_param("i", $id_livro);
+        $check_disponivel->execute();
+        if ($check_disponivel->get_result()->num_rows > 0) {
+            // Buscar título do livro
+            $get_titulo = $conn->prepare("SELECT titulo FROM livro WHERE id = ?");
+            $get_titulo->bind_param("i", $id_livro);
+            $get_titulo->execute();
+            $result_titulo = $get_titulo->get_result();
+            $titulo = $result_titulo->fetch_assoc()['titulo'];
+            $get_titulo->close();
+
+            $erros[] = "O livro '" . $titulo . "' já está emprestado!";
+        }
+        $check_disponivel->close();
+    }
+
+    if (!empty($erros)) {
+        $_SESSION['mensagem_erro'] = implode("<br>", $erros);
+        $conn->close();
+        header("location: /emprestimo/novo.php");
         exit;
     }
 
@@ -48,23 +89,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $insert_livro->close();
 
         $_SESSION['mensagem_sucesso'] = "Empréstimo realizado com sucesso!";
-        header("location: /biblioteca/emprestimo/listar.php");
+        $conn->close();
+        header("location: /emprestimo/listar.php");
         exit;
     } else {
         $_SESSION['mensagem_erro'] = "Erro ao realizar empréstimo: " . $conn->error;
     }
 
     $insert->close();
+    $conn->close();
+    header("location: /emprestimo/novo.php");
+    exit;
 }
 
-// Buscar alunos e livros
+// Buscar alunos e livros disponíveis
 include '../includes/database.php';
 $alunos = $conn->query("SELECT * FROM aluno ORDER BY nome");
+
+// Buscar apenas livros que NÃO estão emprestados (disponíveis)
 $livros = $conn->query("SELECT l.*, c.categoria, e.editora FROM livro l
                         LEFT JOIN categoria c ON l.id_categoria = c.id
                         LEFT JOIN editora e ON l.id_editora = e.id
+                        WHERE l.id NOT IN (
+                            SELECT el.id_livro FROM emprestimo_livro el WHERE el.data_devolucao IS NULL
+                        )
                         ORDER BY l.titulo");
 ?>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <title>Novo Empréstimo</title>
+</head>
+<body>
+
+<?php include '../componentes/menu.php'; ?>
 
 <div class="w3-container">
     <?php
@@ -83,7 +144,7 @@ $livros = $conn->query("SELECT l.*, c.categoria, e.editora FROM livro l
                     <?php
                     if ($alunos->num_rows > 0) {
                         while($aluno = $alunos->fetch_assoc()) {
-                            echo "<option value='" . $aluno['id'] . "'>" . $aluno['nome'] . "</option>";
+                            echo "<option value='" . escape($aluno['id']) . "'>" . escape($aluno['nome']) . "</option>";
                         }
                     }
                     ?>
@@ -100,23 +161,26 @@ $livros = $conn->query("SELECT l.*, c.categoria, e.editora FROM livro l
         </div>
         <div class="w3-row-padding w3-margin-top">
             <div class="w3-col s12">
-                <label>Livros</label>
+                <label>Livros Disponíveis</label>
                 <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
                     <?php
                     if ($livros->num_rows > 0) {
                         while($livro = $livros->fetch_assoc()) {
                             echo "<label>";
-                            echo "<input type='checkbox' name='livros[]' value='" . $livro['id'] . "'> ";
-                            echo $livro['titulo'] . " - " . $livro['categoria'] . " (" . $livro['editora'] . ")";
+                            echo "<input type='checkbox' name='livros[]' value='" . escape($livro['id']) . "'> ";
+                            echo escape($livro['titulo']) . " - " . escape($livro['categoria']) . " (" . escape($livro['editora']) . ")";
                             echo "</label><br>";
                         }
+                    } else {
+                        echo "<p class='w3-text-grey'>Nenhum livro disponível para empréstimo.</p>";
                     }
                     ?>
                 </div>
             </div>
         </div>
         <div class="w3-row-padding w3-margin-bottom" >
-            <button type="submit" class="w3-button w3-blue w3-margin-top ">Realizar Empréstimo</button>
+            <button type="submit" class="w3-button w3-blue w3-margin-top">Realizar Empréstimo</button>
+            <a href="/emprestimo/listar.php" class="w3-button w3-grey w3-margin-top">Cancelar</a>
         </div>
     </form>
 </div>

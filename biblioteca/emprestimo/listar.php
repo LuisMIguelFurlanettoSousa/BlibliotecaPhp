@@ -1,3 +1,15 @@
+<?php
+include "../includes/validar_sessao.php";
+include "../includes/database.php";
+include "../includes/validacoes.php";
+
+$sql = "SELECT e.*, a.nome as aluno_nome, u.nome as usuario_nome
+        FROM emprestimo e
+        LEFT JOIN aluno a ON e.id_aluno = a.id
+        LEFT JOIN usuario u ON e.id_usuario = u.id
+        ORDER BY e.data_emprestimo DESC";
+$result = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,18 +20,7 @@
 </head>
 <body>
 
-<?php
-  include "../includes/validar_sessao.php";
-  include "../componentes/menu.php";
-  include "../includes/database.php";
-
-  $sql = "SELECT e.*, a.nome as aluno_nome, u.nome as usuario_nome
-          FROM emprestimo e
-          LEFT JOIN aluno a ON e.id_aluno = a.id
-          LEFT JOIN usuario u ON e.id_usuario = u.id
-          ORDER BY e.data_emprestimo DESC";
-  $result = $conn->query($sql);
-?>
+<?php include "../componentes/menu.php"; ?>
 
 <div class="w3-container">
   <?php
@@ -34,7 +35,7 @@
 
   <h2 class="w3-margin-top">Lista de Empréstimos</h2>
 
-  <a href="/biblioteca/emprestimo/novo.php"><button class="w3-button w3-green w3-round">Novo Empréstimo</button></a>
+  <a href="/emprestimo/novo.php"><button class="w3-button w3-green w3-round">Novo Empréstimo</button></a>
 
   <table class="w3-table-all w3-margin-top ">
     <thead>
@@ -68,7 +69,7 @@ if ($result->num_rows > 0) {
       $todos_devolvidos = true;
       while($livro = $result_livros->fetch_assoc()) {
           $status_livro = $livro['data_devolucao'] ? " (Devolvido)" : " (Pendente)";
-          $livros_list[] = $livro['titulo'] . $status_livro;
+          $livros_list[] = escape($livro['titulo']) . $status_livro;
           if (!$livro['data_devolucao']) {
               $todos_devolvidos = false;
           }
@@ -77,11 +78,11 @@ if ($result->num_rows > 0) {
       $status_emprestimo = $todos_devolvidos ? "<span class='w3-tag w3-green'>Concluído</span>" : "<span class='w3-tag w3-orange'>Em andamento</span>";
 
       echo "<tr>";
-      echo "<td>" . $row['id'] . "</td>";
-      echo "<td>" . $row['aluno_nome'] . "</td>";
+      echo "<td>" . escape($row['id']) . "</td>";
+      echo "<td>" . escape($row['aluno_nome']) . "</td>";
       echo "<td>" . date('d/m/Y', strtotime($row['data_emprestimo'])) . "</td>";
       echo "<td>" . date('d/m/Y', strtotime($row['data_devolucao_prevista'])) . "</td>";
-      echo "<td>" . $row['usuario_nome'] . "</td>";
+      echo "<td>" . escape($row['usuario_nome']) . "</td>";
       echo "<td>" . $livros_texto . "</td>";
       echo "<td>" . $status_emprestimo . "</td>";
       echo "</tr>";

@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <title>Devolução de Livros</title>
-</head>
-<body>
-
 <?php
 include '../includes/validar_sessao.php';
-include '../componentes/menu.php';
+include '../includes/validacoes.php';
 include '../includes/database.php';
 
 // Processar devolução
@@ -29,6 +19,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['devolver'])) {
 
         $stmt_dev->close();
         $_SESSION['mensagem_sucesso'] = "Devolução registrada com sucesso!";
+
+        // Redirecionar para evitar reenvio do formulário
+        header("location: /devolucao/index.php");
+        exit;
     } else {
         $_SESSION['mensagem_erro'] = "Selecione pelo menos um livro para devolver.";
     }
@@ -76,6 +70,17 @@ if (isset($_GET['id_emprestimo'])) {
     }
 }
 ?>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <title>Devolução de Livros</title>
+</head>
+<body>
+
+<?php include '../componentes/menu.php'; ?>
 
 <div class="w3-container">
   <?php
@@ -105,8 +110,8 @@ if (isset($_GET['id_emprestimo'])) {
                             if ($emprestimos->num_rows > 0) {
                                 while($emp = $emprestimos->fetch_assoc()) {
                                     $selected = (isset($_GET['id_emprestimo']) && $_GET['id_emprestimo'] == $emp['id']) ? 'selected' : '';
-                                    echo "<option value='" . $emp['id'] . "' $selected>";
-                                    echo "ID: " . $emp['id'] . " - " . $emp['aluno_nome'] . " - ";
+                                    echo "<option value='" . escape($emp['id']) . "' $selected>";
+                                    echo "ID: " . escape($emp['id']) . " - " . escape($emp['aluno_nome']) . " - ";
                                     echo date('d/m/Y', strtotime($emp['data_emprestimo']));
                                     echo "</option>";
                                 }
@@ -129,16 +134,16 @@ if (isset($_GET['id_emprestimo'])) {
             <h3>2. Selecione os Livros para Devolução</h3>
         </div>
         <div class="w3-container">
-            <p><strong>Aluno:</strong> <?php echo $emprestimo_selecionado['aluno_nome']; ?></p>
+            <p><strong>Aluno:</strong> <?php echo escape($emprestimo_selecionado['aluno_nome']); ?></p>
             <p><strong>Data Empréstimo:</strong> <?php echo date('d/m/Y', strtotime($emprestimo_selecionado['data_emprestimo'])); ?></p>
             <p><strong>Data Devolução Prevista:</strong> <?php echo date('d/m/Y', strtotime($emprestimo_selecionado['data_devolucao_prevista'])); ?></p>
 
-            <form method="POST" action="index.php?id_emprestimo=<?php echo $emprestimo_selecionado['id']; ?>">
+            <form method="POST" action="index.php?id_emprestimo=<?php echo escape($emprestimo_selecionado['id']); ?>">
                 <div class="w3-margin-top">
                     <?php foreach($livros_pendentes as $livro): ?>
                     <label class="w3-block" style="padding: 10px; border: 1px solid #ccc; margin-bottom: 5px;">
-                        <input type="checkbox" name="livros_devolver[]" value="<?php echo $livro['id_emprestimo_livro']; ?>">
-                        <strong><?php echo $livro['titulo']; ?></strong> - ISBN: <?php echo $livro['isbn']; ?>
+                        <input type="checkbox" name="livros_devolver[]" value="<?php echo escape($livro['id_emprestimo_livro']); ?>">
+                        <strong><?php echo escape($livro['titulo']); ?></strong> - ISBN: <?php echo escape($livro['isbn']); ?>
                     </label>
                     <?php endforeach; ?>
                 </div>

@@ -8,6 +8,6 @@ $_SESSION = array();
 session_destroy();
 
 // Redireciona para a página de login
-header("Location: /biblioteca/login/login.php?status=2");
+header("Location: /login/login.php?status=2");
 exit;
 ?>

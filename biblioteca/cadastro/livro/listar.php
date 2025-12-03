@@ -1,3 +1,13 @@
+<?php
+include "../../includes/validar_sessao.php";
+include "../../includes/database.php";
+include "../../includes/validacoes.php";
+
+$sql = "SELECT l.*, c.categoria, e.editora FROM livro l
+        LEFT JOIN categoria c ON l.id_categoria = c.id
+        LEFT JOIN editora e ON l.id_editora = e.id";
+$result = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,16 +18,7 @@
 </head>
 <body>
 
-<?php
-  include "../../includes/validar_sessao.php";
-  include "../../componentes/menu.php";
-  include "../../includes/database.php";
-
-  $sql = "SELECT l.*, c.categoria, e.editora FROM livro l
-          LEFT JOIN categoria c ON l.id_categoria = c.id
-          LEFT JOIN editora e ON l.id_editora = e.id";
-  $result = $conn->query($sql);
-?>
+<?php include "../../componentes/menu.php"; ?>
 
 <div class="w3-container">
   <?php
@@ -32,7 +33,7 @@
 
   <h2 class="w3-margin-top">Lista de Livros</h2>
 
-  <a href="/biblioteca/cadastro/livro/adicionar.php"><button class="w3-button w3-green w3-round">Novo Livro</button></a>
+  <a href="/cadastro/livro/adicionar.php"><button class="w3-button w3-green w3-round">Novo Livro</button></a>
 
   <table class="w3-table-all w3-margin-top ">
     <thead>
@@ -68,15 +69,15 @@ if ($result->num_rows > 0) {
       $autores_texto = implode(", ", $autores);
 
       echo "<tr>";
-      echo "<td>" . $row['titulo'] . "</td>";
-      echo "<td>" . $row['categoria'] . "</td>";
-      echo "<td>" . $row['editora'] . "</td>";
-      echo "<td>" . $row['ano_publicacao'] . "</td>";
-      echo "<td>" . $row['isbn'] . "</td>";
-      echo "<td>" . $autores_texto . "</td>";
+      echo "<td>" . escape($row['titulo']) . "</td>";
+      echo "<td>" . escape($row['categoria']) . "</td>";
+      echo "<td>" . escape($row['editora']) . "</td>";
+      echo "<td>" . escape($row['ano_publicacao']) . "</td>";
+      echo "<td>" . escape($row['isbn']) . "</td>";
+      echo "<td>" . escape($autores_texto) . "</td>";
       echo "<td>";
-      echo "<a href='/biblioteca/cadastro/livro/alterar.php?id=". $row['id'] . "' class='w3-button w3-tiny w3-round w3-blue'>Alterar</a>";
-      echo "<a href='/biblioteca/cadastro/livro/excluir.php?id=". $row['id'] . "' class='w3-button w3-tiny w3-round w3-red'>Excluir</a>";
+      echo "<a href='/cadastro/livro/alterar.php?id=". escape($row['id']) . "' class='w3-button w3-tiny w3-round w3-blue'>Alterar</a> ";
+      echo "<a href='/cadastro/livro/excluir.php?id=". escape($row['id']) . "' class='w3-button w3-tiny w3-round w3-red' onclick=\"return confirm('Tem certeza que deseja excluir?')\">Excluir</a>";
       echo "</td>";
       echo "</tr>";
 

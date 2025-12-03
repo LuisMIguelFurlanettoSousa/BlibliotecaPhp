@@ -1,3 +1,11 @@
+<?php
+include "../../includes/validar_sessao.php";
+include "../../includes/database.php";
+include "../../includes/validacoes.php";
+
+$sql = "SELECT * FROM categoria";
+$result = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,14 +16,7 @@
 </head>
 <body>
 
-<?php
-  include "../../includes/validar_sessao.php";
-  include "../../componentes/menu.php";
-  include "../../includes/database.php";
-
-  $sql = "SELECT * FROM categoria";
-  $result = $conn->query($sql);
-?>
+<?php include "../../componentes/menu.php"; ?>
 
 <div class="w3-container">
   <?php
@@ -30,7 +31,7 @@
 
   <h2 class="w3-margin-top">Lista de Categorias</h2>
 
-  <a href="/biblioteca/cadastro/categoria/adicionar.php"><button class="w3-button w3-green w3-round">Nova Categoria</button></a>
+  <a href="/cadastro/categoria/adicionar.php"><button class="w3-button w3-green w3-round">Nova Categoria</button></a>
 
   <table class="w3-table-all w3-margin-top ">
     <thead>
@@ -46,11 +47,11 @@
 if ($result->num_rows > 0) {
   while($row = $result->fetch_assoc()) {
       echo "<tr>";
-      echo "<td>" . $row['categoria'] . "</td>";
-      echo "<td>" . $row['descricao'] . "</td>";
+      echo "<td>" . escape($row['categoria']) . "</td>";
+      echo "<td>" . escape($row['descricao']) . "</td>";
       echo "<td>";
-      echo "<a href='/biblioteca/cadastro/categoria/alterar.php?id=". $row['id'] . "' class='w3-button w3-tiny w3-round w3-blue'>Alterar</a>";
-      echo "<a href='/biblioteca/cadastro/categoria/excluir.php?id=". $row['id'] . "' class='w3-button w3-tiny w3-round w3-red'>Excluir</a>";
+      echo "<a href='/cadastro/categoria/alterar.php?id=". escape($row['id']) . "' class='w3-button w3-tiny w3-round w3-blue'>Alterar</a> ";
+      echo "<a href='/cadastro/categoria/excluir.php?id=". escape($row['id']) . "' class='w3-button w3-tiny w3-round w3-red' onclick=\"return confirm('Tem certeza que deseja excluir?')\">Excluir</a>";
       echo "</td>";
       echo "</tr>";
   }

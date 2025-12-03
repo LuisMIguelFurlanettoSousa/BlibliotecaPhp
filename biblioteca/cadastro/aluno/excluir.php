@@ -25,6 +25,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
   }
 }
 
-header("location: /biblioteca/cadastro/aluno/listar.php");
+header("location: /cadastro/aluno/listar.php");
 
 ?>

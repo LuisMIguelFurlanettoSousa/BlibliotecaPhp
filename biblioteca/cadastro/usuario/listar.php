@@ -1,3 +1,12 @@
+<?php
+include "../../includes/validar_sessao.php";
+include "../../includes/database.php";
+include "../../includes/validacoes.php";
+
+// Prepara a consulta sql
+$sql = "SELECT id, nome, usuario FROM usuario";
+$result = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,16 +17,7 @@
 </head>
 <body>
 
-<?php
-  session_start();
-  include "../../includes/validar_sessao.php";
-  include "../../componentes/menu.php";
-  include "../../includes/database.php";
-
-  // Prepara a consulta sql
-  $sql = "SELECT id, nome, usuario FROM usuario";
-  $result = $conn->query($sql);
-?>
+<?php include "../../componentes/menu.php"; ?>
 
 <div class="w3-container">
   <?php
@@ -32,7 +32,7 @@
 
   <h2 class="w3-margin-top">Lista de Usuários</h2>
 
-  <a href="/biblioteca/cadastro/usuario/adicionar.php"><button class="w3-button w3-green w3-round">Novo Usuário</button></a>
+  <a href="/cadastro/usuario/adicionar.php"><button class="w3-button w3-green w3-round">Novo Usuário</button></a>
 
   <table class="w3-table-all w3-margin-top">
     <thead>
@@ -48,12 +48,12 @@
 if ($result->num_rows > 0) {
   while($row = $result->fetch_assoc()) {
       echo "<tr>";
-      echo "<td>" . $row['id'] . "</td>";
-      echo "<td>" . $row['nome'] . "</td>";
-      echo "<td>" . $row['usuario'] . "</td>";
+      echo "<td>" . escape($row['id']) . "</td>";
+      echo "<td>" . escape($row['nome']) . "</td>";
+      echo "<td>" . escape($row['usuario']) . "</td>";
       echo "<td>";
-      echo "<a href='/biblioteca/cadastro/usuario/alterar.php?id=". $row['id'] . "' class='w3-button w3-tiny w3-round w3-blue'>Alterar</a> ";
-      echo "<a href='/biblioteca/cadastro/usuario/excluir.php?id=". $row['id'] . "' class='w3-button w3-tiny w3-round w3-red'>Excluir</a>";
+      echo "<a href='/cadastro/usuario/alterar.php?id=". escape($row['id']) . "' class='w3-button w3-tiny w3-round w3-blue'>Alterar</a> ";
+      echo "<a href='/cadastro/usuario/excluir.php?id=". escape($row['id']) . "' class='w3-button w3-tiny w3-round w3-red' onclick=\"return confirm('Tem certeza que deseja excluir?')\">Excluir</a>";
       echo "</td>";
       echo "</tr>";
   }

@@ -1,3 +1,23 @@
+<?php
+include "../includes/validar_sessao.php";
+include "../includes/database.php";
+include "../includes/validacoes.php";
+
+// Buscar livros atualmente emprestados (não devolvidos)
+$sql = "SELECT l.titulo, l.isbn, c.categoria, e.editora, a.nome as aluno_nome,
+               emp.data_emprestimo, emp.data_devolucao_prevista,
+               DATEDIFF(CURDATE(), emp.data_devolucao_prevista) as dias_atraso
+        FROM emprestimo_livro el
+        JOIN livro l ON el.id_livro = l.id
+        JOIN emprestimo emp ON el.id_emprestimo = emp.id
+        JOIN aluno a ON emp.id_aluno = a.id
+        LEFT JOIN categoria c ON l.id_categoria = c.id
+        LEFT JOIN editora e ON l.id_editora = e.id
+        WHERE el.data_devolucao IS NULL
+        ORDER BY emp.data_devolucao_prevista ASC";
+
+$result = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,26 +28,7 @@
 </head>
 <body>
 
-<?php
-  include "../includes/validar_sessao.php";
-  include "../componentes/menu.php";
-  include "../includes/database.php";
-
-  // Buscar livros atualmente emprestados (não devolvidos)
-  $sql = "SELECT l.titulo, l.isbn, c.categoria, e.editora, a.nome as aluno_nome,
-                 emp.data_emprestimo, emp.data_devolucao_prevista,
-                 DATEDIFF(CURDATE(), emp.data_devolucao_prevista) as dias_atraso
-          FROM emprestimo_livro el
-          JOIN livro l ON el.id_livro = l.id
-          JOIN emprestimo emp ON el.id_emprestimo = emp.id
-          JOIN aluno a ON emp.id_aluno = a.id
-          LEFT JOIN categoria c ON l.id_categoria = c.id
-          LEFT JOIN editora e ON l.id_editora = e.id
-          WHERE el.data_devolucao IS NULL
-          ORDER BY emp.data_devolucao_prevista ASC";
-
-  $result = $conn->query($sql);
-?>
+<?php include "../componentes/menu.php"; ?>
 
 <div class="w3-container">
   <h2 class="w3-margin-top">Relatório: Livros Atualmente Emprestados</h2>
@@ -71,14 +72,14 @@ if ($result->num_rows > 0) {
       }
 
       echo "<tr class='$status_class'>";
-      echo "<td>" . $row['titulo'] . "</td>";
-      echo "<td>" . $row['isbn'] . "</td>";
-      echo "<td>" . $row['categoria'] . "</td>";
-      echo "<td>" . $row['editora'] . "</td>";
-      echo "<td>" . $row['aluno_nome'] . "</td>";
+      echo "<td>" . escape($row['titulo']) . "</td>";
+      echo "<td>" . escape($row['isbn']) . "</td>";
+      echo "<td>" . escape($row['categoria']) . "</td>";
+      echo "<td>" . escape($row['editora']) . "</td>";
+      echo "<td>" . escape($row['aluno_nome']) . "</td>";
       echo "<td>" . date('d/m/Y', strtotime($row['data_emprestimo'])) . "</td>";
       echo "<td>" . date('d/m/Y', strtotime($row['data_devolucao_prevista'])) . "</td>";
-      echo "<td>" . $status_text . "</td>";
+      echo "<td>" . escape($status_text) . "</td>";
       echo "</tr>";
   }
 } else {

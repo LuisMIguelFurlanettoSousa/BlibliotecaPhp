@@ -1,3 +1,11 @@
+<?php
+include "../../includes/validar_sessao.php";
+include "../../includes/database.php";
+include "../../includes/validacoes.php";
+
+$sql = "SELECT * FROM autor";
+$result = $conn->query($sql);
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -8,14 +16,7 @@
 </head>
 <body>
 
-<?php
-  include "../../includes/validar_sessao.php";
-  include "../../componentes/menu.php";
-  include "../../includes/database.php";
-
-  $sql = "SELECT * FROM autor";
-  $result = $conn->query($sql);
-?>
+<?php include "../../componentes/menu.php"; ?>
 
 <div class="w3-container">
   <?php
@@ -30,7 +31,7 @@
 
   <h2 class="w3-margin-top">Lista de Autores</h2>
 
-  <a href="/biblioteca/cadastro/autor/adicionar.php"><button class="w3-button w3-green w3-round">Novo Autor</button></a>
+  <a href="/cadastro/autor/adicionar.php"><button class="w3-button w3-green w3-round">Novo Autor</button></a>
 
   <table class="w3-table-all w3-margin-top ">
     <thead>
@@ -50,15 +51,15 @@
 if ($result->num_rows > 0) {
   while($row = $result->fetch_assoc()) {
       echo "<tr>";
-      echo "<td>" . $row['autor'] . "</td>";
-      echo "<td>" . $row['pseudonimo'] . "</td>";
-      echo "<td>" . $row['nacionalidade'] . "</td>";
-      echo "<td>" . $row['email'] . "</td>";
-      echo "<td>" . $row['telefone'] . "</td>";
-      echo "<td>" . $row['endereco_web'] . "</td>";
+      echo "<td>" . escape($row['autor']) . "</td>";
+      echo "<td>" . escape($row['pseudonimo']) . "</td>";
+      echo "<td>" . escape($row['nacionalidade']) . "</td>";
+      echo "<td>" . escape($row['email']) . "</td>";
+      echo "<td>" . escape(formatar_telefone($row['telefone'])) . "</td>";
+      echo "<td>" . escape($row['endereco_web']) . "</td>";
       echo "<td>";
-      echo "<a href='/biblioteca/cadastro/autor/alterar.php?id=". $row['id'] . "' class='w3-button w3-tiny w3-round w3-blue'>Alterar</a>";
-      echo "<a href='/biblioteca/cadastro/autor/excluir.php?id=". $row['id'] . "' class='w3-button w3-tiny w3-round w3-red'>Excluir</a>";
+      echo "<a href='/cadastro/autor/alterar.php?id=". escape($row['id']) . "' class='w3-button w3-tiny w3-round w3-blue'>Alterar</a> ";
+      echo "<a href='/cadastro/autor/excluir.php?id=". escape($row['id']) . "' class='w3-button w3-tiny w3-round w3-red' onclick=\"return confirm('Tem certeza que deseja excluir?')\">Excluir</a>";
       echo "</td>";
       echo "</tr>";
   }

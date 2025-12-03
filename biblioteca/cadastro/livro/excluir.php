@@ -33,6 +33,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
   }
 }
 
-header("location: /biblioteca/cadastro/livro/listar.php");
+header("location: /cadastro/livro/listar.php");
 
 ?>

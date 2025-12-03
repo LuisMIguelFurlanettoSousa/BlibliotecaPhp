@@ -28,7 +28,7 @@ include 'componentes/menu.php';
                 </div>
                 <div class="w3-container">
                     <p>Gerencie alunos, autores, categorias, editoras e livros.</p>
-                    <a href="/biblioteca/cadastro/aluno/listar.php" class="w3-button w3-blue w3-margin-bottom">Acessar</a>
+                    <a href="/cadastro/aluno/listar.php" class="w3-button w3-blue w3-margin-bottom">Acessar</a>
                 </div>
             </div>
         </div>
@@ -40,7 +40,7 @@ include 'componentes/menu.php';
                 </div>
                 <div class="w3-container">
                     <p>Realize novos empréstimos e consulte os existentes.</p>
-                    <a href="/biblioteca/emprestimo/novo.php" class="w3-button w3-green w3-margin-bottom">Acessar</a>
+                    <a href="/emprestimo/novo.php" class="w3-button w3-green w3-margin-bottom">Acessar</a>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@ include 'componentes/menu.php';
                 </div>
                 <div class="w3-container">
                     <p>Registre a devolução de livros emprestados.</p>
-                    <a href="/biblioteca/devolucao/index.php" class="w3-button w3-orange w3-margin-bottom">Acessar</a>
+                    <a href="/devolucao/index.php" class="w3-button w3-orange w3-margin-bottom">Acessar</a>
                 </div>
             </div>
         </div>

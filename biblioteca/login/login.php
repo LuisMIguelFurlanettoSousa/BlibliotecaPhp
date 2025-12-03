@@ -3,7 +3,7 @@ session_start();
 
 // caso o usuario já esteja logado rediciona para a pagina principal
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    header("Location: /biblioteca/index.php");
+    header("Location: /index.php");
     exit;
 }
 ?>
@@ -19,7 +19,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
             <div class="w3-container w3-blue">
                 <h2>Login - Biblioteca</h2>
             </div>
-            <form class="w3-container" method="POST" action="/biblioteca/login/check_login.php">
+            <form class="w3-container" method="POST" action="/login/check_login.php">
                 <p>
                     <label>Usuário</label>
                     <input class="w3-input" type="text" name="username" required>

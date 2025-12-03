@@ -1,5 +1,4 @@
 <?php
-session_start();
 include '../../includes/validar_sessao.php';
 include '../../includes/database.php';
 
@@ -9,7 +8,7 @@ if(isset($_GET["id"])) {
     // Não permitir excluir o próprio usuário logado
     if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $id) {
         $_SESSION['mensagem_erro'] = "Você não pode excluir seu próprio usuário!";
-        header("location: /biblioteca/cadastro/usuario/listar.php");
+        header("location: /cadastro/usuario/listar.php");
         exit;
     }
 
@@ -24,7 +23,7 @@ if(isset($_GET["id"])) {
         $_SESSION['mensagem_erro'] = "Não é possível excluir este usuário pois ele possui empréstimos registrados.";
         $check->close();
         $conn->close();
-        header("location: /biblioteca/cadastro/usuario/listar.php");
+        header("location: /cadastro/usuario/listar.php");
         exit;
     }
     $check->close();
@@ -46,6 +45,6 @@ if(isset($_GET["id"])) {
 }
 
 $conn->close();
-header("location: /biblioteca/cadastro/usuario/listar.php");
+header("location: /cadastro/usuario/listar.php");
 exit;
 ?>
